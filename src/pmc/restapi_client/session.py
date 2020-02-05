@@ -7,9 +7,9 @@ import requests
 from pmc.restapi_client import ppformat as ppf
 from num2words import num2words as n2w
 
-RETRY_MAX_TIME = 120
-RETRY_MAX_TRIES = 0
-RETRY_MAX_TIME_BETWEEN_TRIES = 15
+RETRY_MAX_TIME = 300  # Maximum amount of time (in seconds) to try.
+RETRY_MAX_TRIES = None  # Unlimited number of tries by default
+RETRY_MAX_VALUE = 30  # Maximum number of seconds between tries
 RETRY_CODES = tuple((408, 429, *range(500, 600)))
 RETRY_EXCEPTIONS = (
     requests.exceptions.ConnectionError,
@@ -18,7 +18,7 @@ RETRY_EXCEPTIONS = (
 )
 RETRY_PREDICATE = lambda response: response.status_code in RETRY_CODES  # noqa
 RETRY_WAIT_GEN = backoff.fibo
-RETRY_WAIT_GEN_KWARGS = {"max_value": RETRY_MAX_TIME_BETWEEN_TRIES}
+RETRY_WAIT_GEN_KWARGS = {"max_value": RETRY_MAX_VALUE}
 
 
 def _backoff_log(details):
