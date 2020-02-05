@@ -22,13 +22,19 @@ to install various python package/scripts in kind
 of `standalone` mode.
 
 ```sh
-ssh://git@bitbucket.be-md.ncbi.nlm.nih.gov:9418/pmc/python-pmc-restapi-client.git
+git clone ssh://git@bitbucket.be-md.ncbi.nlm.nih.gov:9418/pmc/python-pmc-restapi-client.git
 cd python-pmc-restapi-client
 misc/run_pipenv_init.sh 
 misc/run_pip_install_req_dev.sh 
 ```
 
-Then do your development. 
+Then modify your requirements/*.in files, run 
+```sh
+misc/run_pip_multi.sh
+misc/run_pip_install_req_dev.sh 
+```
+and now you are ready to start your development. 
+
 
 ### Notes:
 
@@ -74,10 +80,8 @@ misc/run_tests_pytest.sh
 ```python
 from pmc.restapi_client import RestApi
 
-options = {
-    'ENDPOINT': 'http://api.domain.tld/api',
-    'LOGIN_PATH': 'auth/login/', # relative or absolute path to ENDPOINT
-    'LOGOUT_PATH': 'auth/logout/', # relative or absolute path to ENDPOINT
+args = {
+    
 }
 
 new_item = {"field1": "value1", "field2": "value2"}
@@ -85,8 +89,8 @@ replace_item = {"field1": "value1_", "field2": "value2_"}
 patch_item = {"field1": "value1_"}
 email = "abc@domain.com"
 passwd = "xyz"
-
-api = RestApi(options)
+end_point = 'http://api.domain.tld/api'
+api = RestApi(end_point=end_point, session=None, debug=0)
 ok = api.login(email=email, password=passwd)
 
 if ok:
