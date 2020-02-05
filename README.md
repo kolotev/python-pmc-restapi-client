@@ -3,7 +3,11 @@
 pmc-restapi-client is a python package that provides a simple way to communicate to
 RESTful APIs. It acts as a convenience wrapper around the requests package and abstracts
 away the handling of URLs, (de)serialization, and request processing. Currently JSON
-(de)serialization is supported.
+(de)serialization is supported. One of the important features of this package is support of fault tollerant sesssions, which you may configure. The requests are retried on the following failures up-to specified parameters for the following HTTP codes 408, 429, >=500 and <=599, and exceptions:
+
+    requests.exceptions.ConnectionError
+    requests.exceptions.Timeout
+    requests.exceptions.RetryError
 
 ## Install
 
@@ -101,9 +105,9 @@ end_point = 'http://api.domain/api'
 
 # choose your scenarios of api client.
 if environment == "Impatient":
-    api = RestApi(ep=end_point, session=ImpatientSessionType)
+    api = RestApi(ep=end_point, session=ImpatientSessionType())
 elif environment == "Patient":
-    api = RestApi(ep=end_point, session=PatientSessionType)
+    api = RestApi(ep=end_point, session=PatientSessionType())
 else:
     api = RestApi(ep=end_point)
 
@@ -111,7 +115,7 @@ new_item = {"field1": "value1", "field2": "value2"}
 replace_item = {"field1": "value1_", "field2": "value2_"}
 patch_item = {"field1": "value1_"}
 
-root, response = api._.get()  # get root page of api (expected in json format)
+data, response = api._.get()  # get API's root page data 
 xlist, response = api.resourceX.get()  # get a list of resourceX items
 item1, response = api.resourceX(id).get()  # get an item of resourceX with id=id (id could be string or number)
 item2, response = api.resourceX.post(json=new_item)  # post/create an item of resourceX
@@ -122,9 +126,15 @@ data, response = api.resourceX.delete()  # delete all items of resourceX, potent
 data, response = api.resourceX.head() # get HEAD response for the list
 data, response = api.resourceX(id).head() # get HEAD response for the item
 
-# with all HTTP methods get(...), post(...), put(...), patch(...), delete(...), head(...)
-# you may/should use arguments compatible with corresponding methods of widely used 
-# requests or requests.Session python packages.
 ```
+### Comments
 
-## API
+All responses from API web service are expected in JSON format only, otherwise the data variable will be assigned `None` value.
+
+With all HTTP methods `get(...)`, `post(...)`, `put(...)`, `patch(...)`, `delete(...)`, `head(...)`
+you may/should supply arguments (except the very first one, which is a url, it should not be specified, because it is filled in by RestApi class functionality) compatible with corresponding methods of widely used 
+requests or requests.Session python packages.
+See more details about arguments on [this page](https://requests.readthedocs.io/en/master/api/).
+
+
+
