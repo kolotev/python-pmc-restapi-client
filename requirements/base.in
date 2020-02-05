@@ -1,1 +1,4 @@
-requests
+requests # session.py
+furl # api.py
+backoff # session.py
+num2words # session.py
