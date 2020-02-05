@@ -47,61 +47,84 @@ and now you are ready to start your development.
 Test configuration is defined in the `tox.ini` file and includes
 `py.test` tests and `flake8` source code checker.
 
-You can run all of the tests:
+You can run all of the tests with one of the following command line snippets:
 
-```sh
-misc/run_bash.sh
-python setup.py test
-```
-
-or 
-
-```sh
-misc/run_tests_setup.sh
-```
-
-
-To run just the `py.test` tests, not `flake8`, and to re-use pipenv `virtualenv` do the following:
-
-```sh
-misc/run_bash.sh
-py.test
-```
-
-or with 
-
+Run tests with pytest.
 ```sh
 misc/run_tests_pytest.sh
 ```
 
+Run tests with tox sequentially.
+```sh
+misc/run_tests_setup.sh
+```
+
+Run tox tests in parallel.
+```sh
+misc/run_tests_tox_p.sh
+```
 
 ## Usage
 
 ```python
-from pmc.restapi_client import RestApi
+from pmc.restapi_client import RestApi, FtsClassFactory
 
-args = {
-    
-}
+# Details  on creating FtsClass classes.
+#
+# @max_tries - The maximum number of attempts to make before giving
+# up. In the case of failure, the result of the last attempt
+# will be returned. The value of None means there is no limit 
+# to the number of tries.
+#
+# @max_time - The maximum total amount of time to try for before
+# giving up. If this time expires, the result of the last
+# attempt will be returned. 
+#
+# @max_value - The maximum value between tries.
+ 
+# create a very Patient Fault Tolerant Type, which could be suitable
+# for long running processes started from command line or crontab
+PatientSessionType =  FtsClassFactory(max_tries=50, max_time=600, max_value=15)
+
+# create a very Fast Fault Tolerant Type, which could be used
+# in web services with low number of tries and with short
+# tollerence period of falures.
+ImpatientSessionType =  FtsClassFactory(max_time=3, max_value=1)
+
+# By default the API is using the following limits for the session
+# max_time = 300
+# max_tries = None
+# max_value = 30
+
+
+end_point = 'http://api.domain/api'
+
+# choose your scenarios of api client.
+if environment == "Impatient":
+    api = RestApi(ep=end_point, session=ImpatientSessionType)
+elif environment == "Patient":
+    api = RestApi(ep=end_point, session=PatientSessionType)
+else:
+    api = RestApi(ep=end_point)
 
 new_item = {"field1": "value1", "field2": "value2"}
 replace_item = {"field1": "value1_", "field2": "value2_"}
 patch_item = {"field1": "value1_"}
-email = "abc@domain.com"
-passwd = "xyz"
-end_point = 'http://api.domain.tld/api'
-api = RestApi(end_point=end_point, session=None, debug=0)
-ok = api.login(email=email, password=passwd)
 
-if ok:
-    x_list = api.resourceX.get()  # get a list of resourceX items
-    x_item1 = api.resourceX(id).get()  # get an item of resourceX with id=id
-    x_item2 = api.resourceX.post(new_item)  # post/create an item of resourceX
-    api.resourceX(id).put(replace_item)  # put/replace an item of resourceX with id=id
-    api.resourceX(id).patch(patch_item)  # patch/update partially an item of resourceX with id=id
-    api.resourceX(id).delete()  # delete an item of resourceX with id=id
-    api.resourceX.delete()  # delete all items of resourceX, potentially dangerous
+root, response = api._.get()  # get root page of api (expected in json format)
+xlist, response = api.resourceX.get()  # get a list of resourceX items
+item1, response = api.resourceX(id).get()  # get an item of resourceX with id=id (id could be string or number)
+item2, response = api.resourceX.post(json=new_item)  # post/create an item of resourceX
+data, response = api.resourceX(id).put(json=replace_item)  # put/replace an item of resourceX with id=id
+data, response = api.resourceX(id).patch(json=patch_item)  # patch/update partially an item of resourceX with id=id
+data, response = api.resourceX(id).delete()  # delete an item of resourceX with id=id
+data, response = api.resourceX.delete()  # delete all items of resourceX, potentially dangerous
+data, response = api.resourceX.head() # get HEAD response for the list
+data, response = api.resourceX(id).head() # get HEAD response for the item
 
+# with all HTTP methods get(...), post(...), put(...), patch(...), delete(...), head(...)
+# you may/should use arguments compatible with corresponding methods of widely used 
+# requests or requests.Session python packages.
 ```
 
 ## API
