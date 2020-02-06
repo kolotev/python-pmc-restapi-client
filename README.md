@@ -115,21 +115,18 @@ new_item = {"field1": "value1", "field2": "value2"}
 replace_item = {"field1": "value1_", "field2": "value2_"}
 patch_item = {"field1": "value1_"}
 
-data, response = api._.get()  # get API's root page data 
-xlist, response = api.resourceX.get()  # get a list of resourceX items
-item1, response = api.resourceX(id).get()  # get an item of resourceX with id=id (id could be string or number)
-item2, response = api.resourceX.post(json=new_item)  # post/create an item of resourceX
-data, response = api.resourceX(id).put(json=replace_item)  # put/replace an item of resourceX with id=id
-data, response = api.resourceX(id).patch(json=patch_item)  # patch/update partially an item of resourceX with id=id
-data, response = api.resourceX(id).delete()  # delete an item of resourceX with id=id
-data, response = api.resourceX.delete()  # delete all items of resourceX, potentially dangerous
-data, response = api.resourceX.head() # get HEAD response for the list
-data, response = api.resourceX(id).head() # get HEAD response for the item
-
+response = api._.get()  # get API's root page data 
+response = api.resourceX.get()  # get a list of resourceX items
+response = api.resourceX(id).get()  # get an item of resourceX with id=id (id could be string or number)
+response = api.resourceX.post(json=new_item)  # post/create an item of resourceX
+response = api.resourceX(id).put(json=replace_item)  # put/replace an item of resourceX with id=id
+response = api.resourceX(id).patch(json=patch_item)  # patch/update partially an item of resourceX with id=id
+response = api.resourceX(id).delete()  # delete an item of resourceX with id=id
+response = api.resourceX.delete()  # delete all items of resourceX, potentially dangerous
+response = api.resourceX.head() # get HEAD response for the list
+response = api.resourceX(id).head() # get HEAD response for the item
 ```
-### Comments
-
-All responses from API web service are expected in JSON format only, otherwise the data variable will be assigned `None` value.
+### Details on RESTFul `verbs`
 
 With all HTTP methods `get(...)`, `post(...)`, `put(...)`, `patch(...)`, `delete(...)`, `head(...)`
 you may/should supply arguments (except the very first one, which is a url, it should not be specified, because it is filled in by RestApi class functionality) compatible with corresponding methods of widely used 
@@ -137,4 +134,47 @@ requests or requests.Session python packages.
 See more details about arguments on [this page](https://requests.readthedocs.io/en/master/api/).
 
 
+### Access to your nested resources or actions
 
+You can make a requests to `any` level of depth 
+ of your nested resources or actions of your api
+
+```python
+response = api.resourceX(id).activate.put() # put request to /resourceX/id/activate
+```
+
+### Access to your de-serilized data.
+
+The data from you API is stored in `data` attribute 
+of the response. Currently, all responses from your RESTFul API 
+service are expected  to be in JSON format only.
+
+In case there was no data supplied by your RESTFul API 
+and there was no error (exception), than the value 
+of the `data` attribute will be `None`.
+
+```python
+data = response.data
+```
+
+### Fault tollerant sessions
+
+You can use fault tollerant session independently of rest_client.api facility to get automatic retries with it.
+
+```
+SessionType =  FtsClassFactory(max_tries=50, max_time=600, max_value=15)
+session = SessionType()
+session.get(...) # send GET request to your web site.
+session.post(...) # send POST request to your web site.
+...
+```
+
+Technically it is a regular session instance from 
+requests.Session module wrapped into retrying mechanism 
+shortly described at the top of this document. 
+
+Therefor you can use all the arguments accepted by 
+corresponding methods sutable for requests.Session() 
+instances.
+
+See more details about arguments on [this page](https://requests.readthedocs.io/en/master/api/).

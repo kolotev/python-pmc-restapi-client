@@ -148,7 +148,8 @@ class RestApi:
 
     def _request(self, method, **kwargs) -> Tuple[Any, requests.Response]:
         resp = self._request_try(method, self._ep.url, **kwargs)
-        return self._process_response(resp), resp
+        resp.data = self._process_response(resp)
+        return resp
 
     def get(self, **kwargs):
         return self._request("get", **kwargs)

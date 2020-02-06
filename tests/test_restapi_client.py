@@ -51,7 +51,8 @@ def test_get_list(requests_mock):
 
     # use RestApi
     api = RestApi(ep=ep)
-    data, resp = api.items.get()
+    resp = api.items.get()
+    data = resp.data
     assert data == payload
 
 
@@ -68,7 +69,8 @@ def test_get_item(requests_mock):
 
     # use RestApi
     api = RestApi(ep=ep)
-    data, resp = api.items(item_id).get()
+    resp = api.items(item_id).get()
+    data = resp.data
     assert data == payload
 
 
@@ -85,7 +87,8 @@ def test_post_item(requests_mock):
 
     # use RestApi
     api = RestApi(ep=ep)
-    data, resp = api.items.post(data=payload)
+    resp = api.items.post(data=payload)
+    data = resp.data
     assert data == result
 
 
@@ -100,5 +103,7 @@ def test_500(requests_mock):
     api = RestApi(ep=ep, session=SessionClass())
     assert str(api._) == ep
 
-    with pytest.raises(HttpServerError):  # match=r".* 123 .*"
-        data, resp = api._.get()
+    with pytest.raises(HttpServerError):
+        resp = api._.get()
+        data = resp.data
+        assert data is None
