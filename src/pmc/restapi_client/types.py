@@ -1,5 +1,5 @@
 from dataclasses import dataclass, InitVar, field
-from furl import furl, Path
+from furl import furl, Path, Query, Fragment
 
 
 @dataclass(repr=False)
@@ -10,9 +10,9 @@ class HttpUrl:
     password: str = field(init=False, repr=False)
     host: str = field(init=False)
     port: int = field(init=False)
-    _path: str = field(init=False, repr=False)
-    query: str = field(init=False)
-    fragment: str = field(init=False)
+    _path: Path = field(init=False, repr=False)
+    query: Query = field(init=False)
+    fragment: Fragment = field(init=False)
     _: "furl.furl.furl" = field(init=False, repr=False)
 
     def __repr__(self):
@@ -20,7 +20,6 @@ class HttpUrl:
 
     def __post_init__(self, url):
         f = self._ = furl(url)
-        f.path /= ""
 
         for k, v in {
             "scheme": "scheme",
@@ -37,6 +36,7 @@ class HttpUrl:
             except ValueError as e:
                 raise ValueError(f"URL property `{k}` is malformed or invalid: {e}")
 
+        self.path /= ""
         self._validate()
 
     def _validate(self):
@@ -72,14 +72,11 @@ class HttpUrl:
     def copy(self) -> "HttpUrl":
         return HttpUrl(self.url)
 
-    def set(self, *args, **kwargs):
-        return self._.set(*args, **kwargs)
-
     @property
     def path(self) -> Path:
         return self._path
 
     @path.setter
     def path(self, path: str) -> None:
-        self._path.set(path)
-        self._path.normalize()
+        self.path.set(path or "/")
+        self.path.normalize()

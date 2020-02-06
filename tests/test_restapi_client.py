@@ -7,11 +7,10 @@ def test_create_api_instance():
     """
     Test `creation of new instance` functionality.
     """
-    api_ep = "http://localhost///api/"
-    api_url = "http://localhost/api/"
+    api_ep = "http://localhost/api/"
     api = RestApi(ep=api_ep)
     assert api is not None  # check that we have got an instance
-    assert str(api) == api_url  # check that the url was normalized.
+    assert str(api) == api_ep  # check that the url was normalized.
 
 
 def test_resource_list():
