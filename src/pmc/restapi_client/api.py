@@ -13,9 +13,6 @@ import requests
 from typing import Tuple, Any
 
 ##############################################################################
-REQUESTS_CONNECT_TIMEOUT = 10
-REQUESTS_READ_TIMEOUT = 30
-
 DEFAULT_HEADERS = {"Content-Type": "application/json", "Accept": "application/json"}
 
 ##############################################################################
@@ -138,9 +135,6 @@ class RestApi:
         session = self._session
         kwargs["headers"] = kwargs.get("headers", {})
         kwargs["headers"].update(self._get_headers())
-        kwargs["timeout"] = kwargs.get(
-            "timeout", (REQUESTS_CONNECT_TIMEOUT, REQUESTS_READ_TIMEOUT)
-        )
         resp = session.request(method, url, **kwargs)
         return resp
 

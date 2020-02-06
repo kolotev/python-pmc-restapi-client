@@ -38,6 +38,45 @@ def _backoff_log(details):
 
 
 class FtsClassFactory:  # Fts stands for Fault Tolerant Session
+    """
+    The FtsClassFactory could be used to create FtSession classes
+    pre-configured with the following properties:
+
+    The created FtSession class is an ancestor of requests.Session class, with
+    extra features on top. It could be used as a regular requests.Session() class
+    to create sessions.
+
+    The following features are implemented:
+        - retrying on predicate, by default the predicate evaluates
+          an HTTP status code and if it among the following:
+          408, 429, 500..599 the request will be retried.
+        - retrying on exception, by default the following exceptions
+          are retried:
+            - requests.exceptions.ConnectionError,
+            - requests.exceptions.Timeout,
+            - requests.exceptions.RetryError,
+
+    Arguments:
+        You can use the following arguments to configure your
+        fault tollerant session class:
+
+        :predicate: backoff compatible predicate
+        :max-time: amount of time to retry
+        :max-tries: number of attempts to try
+        :wait_gen: backoff compatible wait generator
+        :on_backoff: backoff comptible handler
+        :exception: exception or tuple of exceptions to be retried
+        :logger: logging compatbile logger
+        :timeout: connect and read timeouts for requests.
+        :wait_get_kwargs: backoff's wait_gen dependant arguments
+
+    Notes:
+        For backoff related arguments consult with backoff api
+        on the following page https://github.com/litl/backoff
+
+    Returns:
+        FtSession -- decendent of requests.Session class."""
+
     def __new__(
         self,
         predicate=RETRY_PREDICATE,
@@ -47,6 +86,7 @@ class FtsClassFactory:  # Fts stands for Fault Tolerant Session
         on_backoff=_backoff_log,
         exception=RETRY_EXCEPTIONS,
         logger=None,
+        timeout=None,
         **wait_gen_kwargs,
     ):
         if len(wait_gen_kwargs) == 0:
@@ -72,6 +112,8 @@ class FtsClassFactory:  # Fts stands for Fault Tolerant Session
                 **wait_gen_kwargs,
             )
             def request(self, method, url, *args, **kwargs) -> requests.Response:
+                if timeout is not None:
+                    kwargs["timeout"] = kwargs.get("timeout", timeout)
                 return super().request(method, url, *args, **kwargs)
 
         return FtSession
