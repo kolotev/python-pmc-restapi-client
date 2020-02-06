@@ -1,28 +1,26 @@
 from dataclasses import dataclass, InitVar, field
-from furl import furl
+from furl import furl, Path
 
 
-@dataclass
+@dataclass(repr=False)
 class HttpUrl:
     url: InitVar[str]
     scheme: str = field(init=False)
-    user: str = field(init=False, default=None)
-    password: str = field(repr=False, init=False, default=None)
+    user: str = field(init=False)
+    password: str = field(init=False, repr=False)
     host: str = field(init=False)
     port: int = field(init=False)
-    path: str = field(init=False)
-    query: str = field(init=False, default=None)
-    fragment: str = field(init=False, default=None)
-    _: "furl.furl.furl" = field(init=False, default=None, repr=False)
+    _path: str = field(init=False, repr=False)
+    query: str = field(init=False)
+    fragment: str = field(init=False)
+    _: "furl.furl.furl" = field(init=False, repr=False)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({repr(str(self._))})"
 
     def __post_init__(self, url):
-        f = furl(url)
-        f.path.normalize()
-        if f.path == "":
-            f.path /= "/"
-        self._ = f
-        # from devtools import debug as d
-        # print(d.format(f.asdict()))
+        f = self._ = furl(url)
+        f.path /= ""
 
         for k, v in {
             "scheme": "scheme",
@@ -30,7 +28,7 @@ class HttpUrl:
             "password": "password",
             "host": "host",
             "port": "port",
-            "path": "path",
+            "_path": "path",
             "query": "query",
             "fragment": "fragment",
         }.items():
@@ -77,17 +75,11 @@ class HttpUrl:
     def set(self, *args, **kwargs):
         return self._.set(*args, **kwargs)
 
+    @property
+    def path(self) -> Path:
+        return self._path
 
-if __name__ == "__main__":
-    # u = HttpUrl("http://x.y.z/path")
-    # u.path /= "../../xyxz/..///m"
-    # u.path.normalize()
-    # print(u)
-
-    z = HttpUrl("https://dev.ncbi.nlm.nih.gov/pmc/grantlink/api/?bla=x")
-    # z = u# .copy()
-    z.path /= "pubmed10"
-    z._.set(path=z.path)
-    z.path.normalize()
-    print(z.url, z.path)
-    print(z.value, z.path, z._)
+    @path.setter
+    def path(self, path: str) -> None:
+        self._path.set(path)
+        self._path.normalize()

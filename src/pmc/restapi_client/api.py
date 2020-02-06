@@ -78,8 +78,6 @@ class RestApi:
 
         if resource is not None:
             ep.path /= str(resource)
-            ep.set(path=ep.path)  # furl bug fix.
-            ep.path.normalize()
 
         kwargs["ep"] = ep.url
 
