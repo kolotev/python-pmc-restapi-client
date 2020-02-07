@@ -25,6 +25,7 @@ class RestApi:
     Arguments:
         :param ep: end point of API
         :param session: requests' Session instance
+        :param logger: logging compatible logger
         :param debug: integer value representing debug level
         :
         :return: instance this class.
@@ -39,11 +40,13 @@ class RestApi:
         self,
         ep: str,  # API end point
         session: requests.Session = None,
+        logger=None,
         debug: int = 0,
     ):
         self._ep = HttpUrl(ep)
+        self._session = session or FtsClassFactory(logger=logger)()
+        self._logger = logger
         self._debug = debug
-        self._session = session or FtsClassFactory()()
 
     def __getattr__(self, resource):
         """
