@@ -106,3 +106,24 @@ def test_500(requests_mock):
         resp = api._.get()
         data = resp.data
         assert data is None
+
+
+ep = "https://h/api"
+
+
+@pytest.mark.parametrize(
+    "api_url, items_uri, item_uri, item_id, group_slash, discrete_slash",
+    [
+        (f"{ep}", f"/items", f"/items/5", 5, False, False,),
+        (f"{ep}", f"/items", f"/items/5/", 5, False, True,),
+        (f"{ep}/", f"items/", f"items/5", 5, True, False,),
+        (f"{ep}/", f"items/", f"items/5/", 5, True, True,),
+    ],
+)
+def test_group_resource_trailing_slash(
+    api_url, items_uri, item_uri, item_id, group_slash, discrete_slash
+):
+    api = RestApi(ep=ep, group_slash=group_slash, discrete_slash=discrete_slash)
+    assert str(api._) == api_url
+    assert str(api.items) == api_url + items_uri
+    assert str(api.items(item_id)) == api_url + item_uri

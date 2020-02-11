@@ -42,11 +42,15 @@ class RestApi:
         session: requests.Session = None,
         logger=None,
         debug: int = 0,
+        group_slash=True,
+        discrete_slash=False,
     ):
         self._ep = HttpUrl(ep)
         self._session = session or FtsClassFactory(logger=logger)()
         self._logger = logger
         self._debug = debug
+        self._group_slash = group_slash
+        self._discrete_slash = discrete_slash
 
     def __getattr__(self, resource, group=True):
         """
@@ -58,6 +62,13 @@ class RestApi:
 
         Returns:
             RestApi instance"""
+        if not isinstance(resource, str):
+            resource = str(resource)
+
+        if resource.startswith("_"):
+            raise RuntimeError(
+                "Resources starting with `_` (underscore) are not supported."
+            )
 
         kwargs = self._copy_kwargs(resource, group=group)
         return self._get_resource(**kwargs)
@@ -73,13 +84,18 @@ class RestApi:
 
     def _copy_kwargs(self, resource, group):
         kwargs = {}
-        kwargs.update({k.replace("_", ""): v for k, v in self.__dict__.items()})
+        kwargs.update({k.lstrip("_"): v for k, v in self.__dict__.items()})
         ep = self._ep.copy()
 
         if resource is not None:
-            ep.path /= str(resource)
+            ep.path /= resource
+
             if group:
-                ep.path /= "/"
+                if self._group_slash:
+                    ep.path /= "/"
+            else:
+                if self._discrete_slash:
+                    ep.path /= "/"
 
         kwargs["ep"] = ep.url
 

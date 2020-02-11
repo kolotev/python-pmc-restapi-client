@@ -178,3 +178,46 @@ corresponding methods sutable for requests.Session()
 instances.
 
 See more details about arguments on [this page](https://requests.readthedocs.io/en/master/api/).
+
+### Trailing slashes
+
+If you need to configure the behaviuor of API for trailing slashes after group 
+resource (like items) or discrete resource (like item), then you can specify 
+the following arguments `group_slash` or/and `discrete_slash` at the instantiation
+of the RestApi's instance. Both arguments are boolean.
+
+```python
+api = RestApi(ep=end_point_url, group_slash=..., discrete_slash=...)
+```
+
+the default values are:
+```python
+group_slash=True
+discrete_slash=False
+```
+
+Here are the assertions of all combinations of above arguments:
+
+```python
+end_point_url = 'http://host/api'
+
+api = RestApi(ep=end_point_url, group_slash=False, discrete_slash=False)
+assert str(api._) == 'http://host/api'
+assert str(api.items) == 'http://host/api/items'
+assert str(api.items(item_id=5)) == 'http://host/api/items/5'
+
+api = RestApi(ep=end_point_url, group_slash=False, discrete_slash=True)
+assert str(api._) == 'http://host/api'
+assert str(api.items) == 'http://host/api/items'
+assert str(api.items(item_id=5)) == 'http://host/api/items/5/'
+
+api = RestApi(ep=end_point_url, group_slash=True, discrete_slash=False)
+assert str(api._) == 'http://host/api/'
+assert str(api.items) == 'http://host/api/items/'
+assert str(api.items(item_id=5)) == 'http://host/api/items/5'
+
+api = RestApi(ep=end_point_url, group_slash=True, discrete_slash=True)
+assert str(api._) == 'http://host/api/'
+assert str(api.items) == 'http://host/api/items/'
+assert str(api.items(item_id=5)) == 'http://host/api/items/5/'
+```
