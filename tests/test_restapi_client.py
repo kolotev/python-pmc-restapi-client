@@ -18,7 +18,7 @@ def test_resource_list():
     Test `access to the resource list` functionality.
     """
     ep = "http://localhost/api/"
-    resource_url = "http://localhost/api/items"
+    resource_url = "http://localhost/api/items/"
     api = RestApi(ep=ep)
     resource = api.items
     assert type(resource) is RestApi  # check creation of the resource of correct type
@@ -45,7 +45,7 @@ def test_get_list(requests_mock):
     # prepare response with Mocker
     payload = {"result": ["a", "b", "c"]}
     requests_mock.get(
-        ep + "items", json=payload, headers={"Content-Type": "application/json"}
+        ep + "items/", json=payload, headers={"Content-Type": "application/json"}
     )
 
     # use RestApi
@@ -75,7 +75,7 @@ def test_get_item(requests_mock):
 
 def test_post_item(requests_mock):
     ep = "http://localhost/api/"
-    items_url = ep + f"items"
+    items_url = ep + "items/"
 
     # prepare response with Mocker
     payload = {"a": 1, "b": 2, "c": 3}
@@ -92,15 +92,15 @@ def test_post_item(requests_mock):
 
 
 def test_500(requests_mock):
-    ep = "http://localhost/api/500"
-
+    ep = "http://localhost/api"
+    mock_url = ep + "/"
     # prepare response with Mocker
-    requests_mock.get(ep, status_code=500)
+    requests_mock.get(mock_url, status_code=500)
 
     # use RestApi
     SessionClass = FtsClassFactory(max_tries=3, max_time=2)
     api = RestApi(ep=ep, session=SessionClass())
-    assert str(api._) == ep
+    assert str(api._) == mock_url
 
     with pytest.raises(HttpServerError):
         resp = api._.get()

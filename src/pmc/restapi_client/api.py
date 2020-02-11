@@ -48,7 +48,7 @@ class RestApi:
         self._logger = logger
         self._debug = debug
 
-    def __getattr__(self, resource):
+    def __getattr__(self, resource, group=True):
         """
         Returns a RestApi instance for resource segment of API's url.
         To allow api.resource.get() syntax to get list of items of `resource`.
@@ -59,7 +59,7 @@ class RestApi:
         Returns:
             RestApi instance"""
 
-        kwargs = self._copy_kwargs(resource)
+        kwargs = self._copy_kwargs(resource, group=group)
         return self._get_resource(**kwargs)
 
     def __call__(self, item_id):
@@ -69,15 +69,17 @@ class RestApi:
         a specific resource by it's id.
         """
 
-        return self.__getattr__(item_id)
+        return self.__getattr__(item_id, group=False)
 
-    def _copy_kwargs(self, resource):
+    def _copy_kwargs(self, resource, group):
         kwargs = {}
         kwargs.update({k.replace("_", ""): v for k, v in self.__dict__.items()})
         ep = self._ep.copy()
 
         if resource is not None:
             ep.path /= str(resource)
+            if group:
+                ep.path /= "/"
 
         kwargs["ep"] = ep.url
 
