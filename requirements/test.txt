@@ -5,19 +5,56 @@
 #
 #    pip-compile-multi
 #
--r base.txt
-atomicwrites==1.3.0       # via pytest
-attrs==19.3.0             # via pytest
-coverage==5.0.3           # via pytest-cov
-importlib-metadata==1.5.0  # via pluggy
+atomicwrites==1.3.0
+    # via pytest
+attrs==19.3.0
+    # via pytest
+backoff==1.10.0
+    # via -r base.in
+certifi==2019.11.28
+    # via requests
+chardet==3.0.4
+    # via requests
+coverage==5.0.3
+    # via pytest-cov
+docopt==0.6.2
+    # via num2words
+furl==2.1.0
+    # via -r base.in
+idna==2.8
+    # via requests
 mock==3.0.5
-more-itertools==8.2.0     # via pytest
-pluggy==0.13.1            # via pytest
-py==1.8.1                 # via pytest
+    # via -r test.in
+more-itertools==8.2.0
+    # via pytest
+num2words==0.5.10
+    # via -r base.in
+orderedmultidict==1.0.1
+    # via furl
+pluggy==0.13.1
+    # via pytest
+py==1.10.0
+    # via pytest
 pytest-cov==2.8.1
+    # via -r test.in
 pytest==3.10.1
+    # via
+    #   -r test.in
+    #   pytest-cov
 requests-mock==1.7.0
-zipp==2.1.0               # via importlib-metadata
+    # via -r test.in
+requests==2.22.0
+    # via
+    #   -r base.in
+    #   requests-mock
+six==1.14.0
+    # via
+    #   furl
+    #   mock
+    #   pytest
+    #   requests-mock
+urllib3==1.25.8
+    # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
